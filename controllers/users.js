@@ -27,13 +27,13 @@ module.exports.addUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        res.status(400).send({ message: err.message })
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: err.message });
       } else {
         res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
-    })
-}
+    });
+};
 
 module.exports.editUserData = (req, res) => {
   const { name, about } = req.body;
@@ -41,12 +41,12 @@ module.exports.editUserData = (req, res) => {
     User.findByIdAndUpdate(req.user._id, { name, about }, { new: 'true', runValidators: true })
       .then((user) => res.send(user))
       .catch((err) => {
-        if (err.name === "ValidationError") {
-          res.status(400).send({ message: err.message })
+        if (err.name === 'ValidationError') {
+          res.status(400).send({ message: err.message });
         } else {
           res.status(500).send({ message: 'На сервере произошла ошибка' });
         }
-      })
+      });
   } else {
     res.status(500).send({ message: 'На сервере произошла ошибка' });
   }
