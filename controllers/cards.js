@@ -1,10 +1,11 @@
 const Card = require('../models/card');
+const { HTTP_STATUS_CREATED, HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR } = require('http2').constants;
 
 module.exports.getCards = (req, res) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((cards) => res.send(cards))
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch(() => res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' }));
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -12,14 +13,14 @@ module.exports.deleteCard = (req, res) => {
     Card.findOneAndDelete(req.params.cardId)
       .then((card) => {
         if (!card) {
-          res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
+          res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' });
           return;
         }
         res.send({ message: 'Карточка удалена' });
       })
-      .catch(() => res.status(404).send({ message: 'Карточка с указанным _id не найдена' }));
+      .catch(() => res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' }));
   } else {
-    res.status(400).send({ message: 'Передан несуществующий _id карточкиочки' });
+    res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан несуществующий _id карточкиочки' });
   }
 };
 
@@ -29,48 +30,40 @@ module.exports.addCard = (req, res) => {
     .then((card) => {
       Card.findById(card._id)
         .populate('owner')
-        .then((data) => res.status(201).send(data))
-        .catch(() => res.status(404).send({ message: 'Карточка с указанным _id не найдена' }));
+        .then((data) => res.status(HTTP_STATUS_CREATED).send(data))
+        .catch(() => res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' }));
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message });
+        res.status(HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
       } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
+        res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
 
 module.exports.likeCard = (req, res) => {
-  if (req.params.cardId.length === 24) {
-    Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
-      .populate('owner')
-      .then((card) => {
-        if (!card) {
-          res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
-          return;
-        }
-        res.send(card);
-      })
-      .catch(() => res.status(404).send({ message: 'Карточка с указанным _id не найдена' }));
-  } else {
-    res.status(400).send({ message: 'Передан несуществующий _id карточки' });
-  }
+  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    .populate('owner')
+    .then((card) => {
+      if (!card) {
+        res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' });
+        return;
+      }
+      res.send(card);
+    })
+    .catch(() => res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' }));
 };
 
 module.exports.dislikeCard = (req, res) => {
-  if (req.params.cardId.length === 24) {
     Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
       .populate('owner')
       .then((card) => {
         if (!card) {
-          res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
+          res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' });
           return;
         }
         res.send(card);
       })
-      .catch(() => res.status(404).send({ message: 'Карточка с указанным _id не найдена' }));
-  } else {
-    res.status(400).send({ message: 'Передан несуществующий _id карточки' });
-  }
+      .catch(() => res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' }));
 };
