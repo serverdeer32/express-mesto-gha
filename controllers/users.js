@@ -1,5 +1,8 @@
+const {
+  HTTP_STATUS_CREATED, HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_NOT_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR,
+} = require('http2').constants;
 const User = require('../models/user');
-const { HTTP_STATUS_CREATED, HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR } = require('http2').constants;
 
 module.exports.getUsers = (req, res) => {
   User.find({})

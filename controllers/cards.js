@@ -1,5 +1,8 @@
+const {
+  HTTP_STATUS_CREATED, HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_NOT_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR,
+} = require('http2').constants;
 const Card = require('../models/card');
-const { HTTP_STATUS_CREATED, HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR } = require('http2').constants;
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -56,14 +59,14 @@ module.exports.likeCard = (req, res) => {
 };
 
 module.exports.dislikeCard = (req, res) => {
-    Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
-      .populate('owner')
-      .then((card) => {
-        if (!card) {
-          res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' });
-          return;
-        }
-        res.send(card);
-      })
-      .catch(() => res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Неверный _id карточки' }));
+  Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
+    .populate('owner')
+    .then((card) => {
+      if (!card) {
+        res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' });
+        return;
+      }
+      res.send(card);
+    })
+    .catch(() => res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Неверный _id карточки' }));
 };
