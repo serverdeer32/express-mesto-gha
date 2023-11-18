@@ -16,7 +16,7 @@ module.exports.getUserById = (req, res) => {
       }
       res.send(user);
     })
-    .catch((err) => res.status(HTTP_STATUS_BAD_REQUEST).send({ message: err.message }));
+    .catch(() => res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Неверный _id пользователя' }));
 };
 
 module.exports.addUser = (req, res) => {
