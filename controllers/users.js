@@ -21,7 +21,7 @@ module.exports.getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Передан невалидный _id пользователя' });
+        res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан невалидный _id пользователя' });
       }
       res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
