@@ -42,10 +42,17 @@ module.exports.addUser = (req, res) => {
     });
 };
 
+
 module.exports.editUserData = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: 'true', runValidators: true })
-    .then((user) => res.send(user))
+    .then((user) => {
+      if (!user) {
+        res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Пользователь с указанным _id не найдена' });
+        return;
+      }
+      res.send(user);
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
@@ -57,12 +64,18 @@ module.exports.editUserData = (req, res) => {
 
 module.exports.UpdateAvatar = (req, res) => {
   User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: 'true', runValidators: true })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
-      } else {
-        res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+  .then((user) => {
+    if (!user) {
+      res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Пользователь с указанным _id не найдена' });
+      return;
+    }
+    res.send(user);
+  })
+  .catch((err) => {
+    if (err.name === 'ValidationError') {
+      res.status(HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+    } else {
+      res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+    }
+  });
 };
