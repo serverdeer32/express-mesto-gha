@@ -19,16 +19,15 @@ module.exports.getUserById = (req, res) => {
       }
       res.send(user);
     })
-    .catch(() => res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Неверный _id пользователя' }));
-
-  }; 
-//     .catch((err) => {
-//       if (err.name === 'CastError') {
-//         res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан невалидный _id пользователя' });
-//       }
-//       res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-//     });
-// };
+    .catch(() => res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Неверный _id пользователя' }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан невалидный _id пользователя' });
+      } else {
+        res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      }
+    });
+};
 
 module.exports.addUser = (req, res) => {
   const { name, about, avatar } = req.body;
