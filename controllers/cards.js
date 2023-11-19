@@ -12,19 +12,21 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  if (req.params.cardId.length === 24) {
-    Card.findOneAndDelete(req.params.cardId)
-      .then((card) => {
-        if (!card) {
-          res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' });
-          return;
-        }
-        res.send({ message: 'Карточка удалена' });
-      })
-      .catch(() => res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' }));
-  } else {
-    res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Неверный _id карточки' });
-  }
+  Card.findByIdAndDelete(req.params.cardId)
+    .then((card) => {
+      if (!card) {
+        res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' });
+        return;
+      }
+      res.send({ message: 'Карточка удалена' });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан невалидный _id пользователя' });
+      } else {
+        res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
 
 module.exports.addCard = (req, res) => {
@@ -34,7 +36,7 @@ module.exports.addCard = (req, res) => {
       Card.findById(card._id)
         .populate('owner')
         .then((data) => res.status(HTTP_STATUS_CREATED).send(data))
-        .catch(() => res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' }));
+        .catch(() => res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' }));
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -55,7 +57,13 @@ module.exports.likeCard = (req, res) => {
       }
       res.send(card);
     })
-    .catch(() => res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Неверный _id карточки' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан невалидный _id карточки' });
+      } else {
+        res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -68,5 +76,11 @@ module.exports.dislikeCard = (req, res) => {
       }
       res.send(card);
     })
-    .catch(() => res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Неверный _id карточки' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан невалидный _id карточки' });
+      } else {
+        res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };

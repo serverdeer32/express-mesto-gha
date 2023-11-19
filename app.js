@@ -1,3 +1,4 @@
+const { HTTP_STATUS_NOT_FOUND } = require('http2').constants;
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -26,7 +27,7 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 app.all('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый роут не найден' });
+  res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Запрашиваемый роут не найден' });
 });
 
 app.listen(PORT);

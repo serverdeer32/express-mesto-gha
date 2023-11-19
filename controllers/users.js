@@ -19,7 +19,12 @@ module.exports.getUserById = (req, res) => {
       }
       res.send(user);
     })
-    .catch(() => res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Неверный _id пользователя' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Передан невалидный _id пользователя' });
+      }
+      res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+    });
 };
 
 module.exports.addUser = (req, res) => {
@@ -37,27 +42,25 @@ module.exports.addUser = (req, res) => {
 
 module.exports.editUserData = (req, res) => {
   const { name, about } = req.body;
-  if (req.user._id) {
-    User.findByIdAndUpdate(req.user._id, { name, about }, { new: 'true', runValidators: true })
-      .then((user) => res.send(user))
-      .catch((err) => {
-        if (err.name === 'ValidationError') {
-          res.status(HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
-        } else {
-          res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-        }
-      });
-  } else {
-    res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-  }
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: 'true', runValidators: true })
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+      } else {
+        res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
 
 module.exports.UpdateAvatar = (req, res) => {
-  if (req.user._id) {
-    User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: 'true', runValidators: true })
-      .then((user) => res.send(user))
-      .catch(() => res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Пользователь с указанным _id не найден' }));
-  } else {
-    res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-  }
+  User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: 'true', runValidators: true })
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(HTTP_STATUS_BAD_REQUEST).send({ message: err.message });
+      } else {
+        res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
