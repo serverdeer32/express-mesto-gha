@@ -75,10 +75,10 @@ module.exports.likeCard = (req, res, next) => {
       res.status(HTTP_STATUS_OK).send(card);
     })
     .catch((err) => {
-      if (err instanceof CastError) {
-        next(new BadRequestError(`Некорректный _id карточки ${req.params.cadId}`));
+      if (err instanceof DocumentNotFoundError) {
+        next(new BadRequestError(`Картока с _id ${req.params.cardId} не найдена`));
       } else if (err instanceof ValidationError) {
-        next(new NotFoundError('Карточка с _id не найдена'));
+        next(new NotFoundError(`Некорректный _id карточки ${req.params.cardId}`));
       } else {
         next(err);
       }
@@ -93,10 +93,10 @@ module.exports.dislikeCard = (req, res, next) => {
       res.status(HTTP_STATUS_OK).send(card);
     })
     .catch((err) => {
-      if (err instanceof CastError) {
-        next(new BadRequestError(`Некорректный _id карточки ${req.params.cadId}`));
+      if (err instanceof DocumentNotFoundError) {
+        next(new BadRequestError(`Картока с _id ${req.params.cardId} не найдена`));
       } else if (err instanceof ValidationError) {
-        next(new NotFoundError('Карточка с _id не найдена'));
+        next(new NotFoundError(`Некорректный _id карточки ${req.params.cardId}`));
       } else {
         next(err);
       }
