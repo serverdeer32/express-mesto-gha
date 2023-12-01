@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
   about: {
     type: String,
     minlength: [2, 'Минимальная длина описания пользователя - 2 символа'],
-    maxlength: [30, 'Макстмальная длина описания пользователя - 30 символов'],
+    maxlength: [30, 'Максимальная длина описания пользователя - 30 символов'],
     default: 'Исследователь',
   },
   avatar: {
@@ -47,7 +47,6 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
       if (!user) {
         throw new UnauthorizedError('Неверные e-mail или пароль');
       }
-
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {

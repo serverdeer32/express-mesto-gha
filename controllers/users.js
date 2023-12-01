@@ -1,6 +1,5 @@
 const { HTTP_STATUS_CREATED, HTTP_STATUS_OK } = require('http2').constants;
 const { DocumentNotFoundError, ValidationError, CastError } = require('mongoose').Error;
-
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
