@@ -1,11 +1,21 @@
-const { HTTP_STATUS_NOT_FOUND } = require('http2').constants;
+const { HTTP_STATUS_NOT_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR } = require('http2').constants;
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
-
 const app = express();
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+
+app.use(limiter);
+app.use(helmet());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -15,27 +25,21 @@ mongoose.connect(DB_URL, {
   useUnifiedTopology: true,
 });
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '65576b3eb2fb0e277fc89e88', // вставьте сюда _id созданного в предыдущем пункте пользователя
-  };
-
-  next();
-});
-
 app.use('/', require('./routes/index'));
 
 app.all('*', (req, res) => {
   res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Запрашиваемый роут не найден' });
 });
 
+app.use(errors());
+
 app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
+  const { statusCode = HTTP_STATUS_INTERNAL_SERVER_ERROR, message } = err;
 
   res
     .status(statusCode)
     .send({
-      message: statusCode === 500
+      message: statusCode === HTTP_STATUS_INTERNAL_SERVER_ERROR
         ? 'На сервере произошла ошибка'
         : message,
     });
